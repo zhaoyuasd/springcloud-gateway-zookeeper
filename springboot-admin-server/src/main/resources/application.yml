@@ -1,0 +1,16 @@
+server:
+   port: 8081
+
+spring:
+  application:
+    name: server-zk
+  cloud:
+    zookeeper:
+      discovery:
+        root: /zk-service
+        register: false
+      connect-string: localhost:2181
+  security:
+    user:
+      name: zy
+      password: zy

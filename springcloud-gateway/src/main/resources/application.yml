@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: zookeeper-gateway
+  cloud:
+    zookeeper:
+      discovery:
+        root: /zk-service
+       # register: false
+      connect-string: localhost:2181
+    gateway:
+          routes:
+          - id: rewritepath_route
+            uri: lb://has-zk-app
+            predicates:
+            - Path=/foo/**
+            filters:
+            - RewritePath=/foo/(?<segment>.*), /$\{segment} #这个会正常运行 到zk检索注册的服务
+            #- SetPath=/{segment}   #/foo/bar, this will set the path to /bar before making the downstream request.
+            #Failed to handle request [GET http://b2b-10-36-103:8888/foo/hello?name=zy]  这个是用来访问本机的吗 不进行 zk
+            #zk集群的检索吗
+server:
+  port: 8888
+management:
+  endpoints:
+    web:
+      #base-path: "/actuator"
+      exposure:
+        include: "*"
+#The LoadBalancerClientFilter looks for a URI in the exchange attribute ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR.
+#TIf the url has a lb scheme (ie lb://myservice), it will use the Spring Cloud LoadBalancerClient to resolve the name
+#T(myservice in the previous example) to an actual host and port and replace the URI in the same attribute.
+#TThe unmodified original url is appended to the list in the ServerWebExchangeUtils.GATEWAY_ORIGINAL_REQUEST_URL_ATTR
+#Tattribute. The filter will also look in the ServerWebExchangeUtils.GATEWAY_SCHEME_PREFIX_ATTR attribute to see
+#Tif it equals lb and then the same rules apply.
